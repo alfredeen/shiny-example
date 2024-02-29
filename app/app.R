@@ -34,7 +34,14 @@ ui <- fluidPage(
       # Output: Histogram ----
       plotOutput(outputId = "distPlot")
 
-    )
+    ),
+
+  ),
+  # Footer
+  hr(),
+  div(
+      class = "footer",
+      includeHTML("www/footer.html")
   )
 )
 
