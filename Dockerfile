@@ -6,7 +6,8 @@ ENV USER=shiny
 # Install system dependencies including those for tidyverse
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y git libxml2-dev libmagick++-dev \
+    apt-get install --no-install-recommends -y \
+    git libxml2-dev libmagick++-dev \
     wget libgomp1 \  
     libssl-dev \     
     make \
@@ -19,8 +20,11 @@ RUN R -e "install.packages('log4r')"
 RUN rm -rf /srv/shiny-server/*
 COPY /app/ /srv/shiny-server/app
 
-RUN cd /srv/shiny-server/ && \
-    sudo chown -R shiny:shiny /srv/shiny-server/app
+WORKDIR /srv/shiny-server
+
+#RUN cd /srv/shiny-server/ && \
+
+RUN chown -R shiny:shiny /srv/shiny-server/app
 
 WORKDIR /srv/shiny-server/app
 

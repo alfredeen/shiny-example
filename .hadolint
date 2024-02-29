@@ -1,0 +1,6 @@
+failure-threshold: warning               # name of threshold level (error | warning | info | style | ignore | none)
+ignored:                                 # list of rules
+  # Using latest tag of the rocker shiny base image.
+  - DL3007
+  # Pin versions in apt get install.
+  - DL3008
