@@ -1,6 +1,9 @@
 # shiny-example
 A simple example Shiny app written in R.
 
+## Trunk based workflow
+In this repo, we work [Trunk based](https://www.toptal.com/software/trunk-based-development-git-flow), which means that we bypass the dev branch.
+
 ## Begin
 
     cd ./shiny-example
