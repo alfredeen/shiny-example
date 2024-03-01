@@ -21,19 +21,19 @@ RUN R -e "install.packages('log4r')" \
     && R -e "install.packages('RcppTOML')"
 
 
-RUN mkdir logs \
-    && chown -R shiny:shiny /logs
+RUN mkdir rlogs \
+    && chown -R shiny:shiny /rlogs
 
 RUN rm -rf /srv/shiny-server/*
-COPY /app/ /srv/shiny-server/app
+COPY /app/ /srv/shiny-server/
 
 WORKDIR /srv/shiny-server
 
-RUN chown -R shiny:shiny app && \
-    chmod ug+x app/start-script.sh
+RUN chown -R shiny:shiny . && \
+    chmod ug+x start-script.sh
 
 
-WORKDIR /srv/shiny-server/app
+WORKDIR /srv/shiny-server/
 
 USER $USER
 EXPOSE 3838
