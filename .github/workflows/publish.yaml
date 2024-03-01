@@ -38,9 +38,9 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-            images: ghcr.io/alfredeen/shiny-example
-            tags: |
-              type=raw,value={{date 'YYYYMMDD' tz='Europe/Stockholm'}},prefix=${{ github.ref_name }}-
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value={{date 'YYYYMMDD-HHmm' tz='Europe/Stockholm'}},prefix=${{ github.ref_name }}-
 
       - name: Output docker image information
         run: |
@@ -63,6 +63,6 @@ jobs:
             build-args: version=${{ github.ref_name }}
             tags: |
               ${{ steps.meta.outputs.tags }}
-              ghcr.io/alfredeen/shiny-example:latest
+              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             labels: ${{ steps.meta.outputs.labels }}
   
