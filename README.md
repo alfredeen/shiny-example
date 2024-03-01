@@ -14,8 +14,9 @@ Open an R terminal
 
     setwd("shiny-example")
     install.packages("log4r")
-    library(shiny)
+    install.packages('RcppTOML')
     runApp("app")
+
 
 ## Build a docker image locally
 

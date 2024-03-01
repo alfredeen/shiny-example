@@ -1,27 +1,73 @@
 library(shiny)
+library(readr)
 library(log4r)
 library(RcppTOML)
+library(data.table)
+
+print("Begin app.R")
 
 # Logging
 logger <- log4r::logger()
 
-log4r::info(logger, "START app.R")
+log4r::info(logger, "START app.R. Logging enabled.")
 
 # Version
 # Get the version nr from the project toml file
 ver <- "unset"
-file_path <- "project.toml"
+project_filename <- "project.toml"
 
 tryCatch({
-  fd <- read_file(file_Path)
+  fd <- read_file(project_filename)
   toml <- parseTOML(fd, verbose = FALSE, fromFile=FALSE, includize=FALSE, escape=TRUE)
   ver <- toml["app"]$app$version
-  log4r::info(logger, paste("Start of app version = ", ver))
+  log4r::info(logger, paste("Running app version = ", ver))
 }, error=function(e) {
   log4r::warn(logger, e)
 }, warning=function(e) {
   log4r::warn(logger, e)
 })
+
+
+# Verify can create a directory and write to it
+dir_appwork <- "appwork"
+
+tryCatch({
+
+  print(paste("print: Creating directory ", dir_appwork))
+  log4r::debug(logger, paste("Creating directory ", dir_appwork))
+
+  if (!dir.exists(dir_appwork)){
+    dir.create(dir_appwork, showWarnings = TRUE, recursive = TRUE)
+  } else {
+    print("Directory appwork already exists.")
+    log4r::debug(logger, paste("Directory appwork already exists: ", dir_appwork))
+  }
+}, error=function(e) {
+    log4r::warn(logger, e)
+}, warning=function(e) {
+    log4r::warn(logger, e)
+})
+
+
+work_filename <- "df.csv"
+
+df <- data.frame(var1=c(1, 2, 3, 4, 5),
+                 var2=c(6, 7, 8, 9, 0))
+
+tryCatch({
+
+  work_path <- paste(dir_appwork, work_filename, sep="/")
+  print(paste("print: Creating file ", work_path))
+  log4r::debug(logger, paste("Creating file ", work_path))
+  fwrite(df, file=work_path)
+
+}, error=function(e) {
+  log4r::warn(logger, e)
+}, warning=function(e) {
+  log4r::warn(logger, e)
+})
+
+
 
 # Define UI for app that draws a histogram ----
 ui <- fluidPage(
