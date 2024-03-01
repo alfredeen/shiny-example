@@ -26,6 +26,7 @@ RUN mkdir rlogs \
 
 RUN rm -rf /srv/shiny-server/*
 COPY /app/ /srv/shiny-server/
+COPY .Renviron.template /srv/shiny-server/.Renviron
 
 WORKDIR /srv/shiny-server
 
