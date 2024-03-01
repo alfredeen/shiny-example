@@ -18,6 +18,9 @@ RUN apt-get update && \
 RUN R -e "install.packages('log4r')" \
     && R -e "install.packages('RcppTOML')"
 
+RUN mkdir logs \
+    && chown -R shiny:shiny /logs
+
 RUN rm -rf /srv/shiny-server/*
 COPY /app/ /srv/shiny-server/app
 
