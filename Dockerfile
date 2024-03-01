@@ -20,6 +20,7 @@ RUN R -e "install.packages('log4r')" \
     && R -e "install.packages('data.table')" \
     && R -e "install.packages('RcppTOML')"
 
+
 RUN mkdir logs \
     && chown -R shiny:shiny /logs
 
@@ -28,9 +29,9 @@ COPY /app/ /srv/shiny-server/app
 
 WORKDIR /srv/shiny-server
 
-#RUN cd /srv/shiny-server/ && \
+RUN chown -R shiny:shiny app && \
+    chmod ug+x app/start-script.sh
 
-RUN chown -R shiny:shiny /srv/shiny-server/app
 
 WORKDIR /srv/shiny-server/app
 
