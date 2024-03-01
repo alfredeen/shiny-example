@@ -16,6 +16,8 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 RUN R -e "install.packages('log4r')" \
+    && R -e "install.packages('readr')" \
+    && R -e "install.packages('data.table')" \
     && R -e "install.packages('RcppTOML')"
 
 RUN mkdir logs \
