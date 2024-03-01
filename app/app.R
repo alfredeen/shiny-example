@@ -1,11 +1,27 @@
 library(shiny)
+library(log4r)
+library(RcppTOML)
 
 # Logging
-library("log4r")
 logger <- log4r::logger()
 
 log4r::info(logger, "START app.R")
 
+# Version
+# Get the version nr from the project toml file
+ver <- "unset"
+file_path <- "project.toml"
+
+tryCatch({
+  fd <- read_file(file_Path)
+  toml <- parseTOML(fd, verbose = FALSE, fromFile=FALSE, includize=FALSE, escape=TRUE)
+  ver <- toml["app"]$app$version
+  log4r::info(logger, paste("Start of app version = ", ver))
+}, error=function(e) {
+  log4r::warn(logger, e)
+}, warning=function(e) {
+  log4r::warn(logger, e)
+})
 
 # Define UI for app that draws a histogram ----
 ui <- fluidPage(
@@ -41,7 +57,8 @@ ui <- fluidPage(
   hr(),
   div(
       class = "footer",
-      includeHTML("www/footer.html")
+      paste("version ", ver)
+      # includeHTML("www/footer.html")
   )
 )
 

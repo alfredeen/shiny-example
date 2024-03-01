@@ -15,7 +15,8 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN R -e "install.packages('log4r')"
+RUN R -e "install.packages('log4r')" \
+    && R -e "install.packages('RcppTOML')"
 
 RUN rm -rf /srv/shiny-server/*
 COPY /app/ /srv/shiny-server/app
