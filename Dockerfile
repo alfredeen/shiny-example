@@ -2,6 +2,7 @@
 FROM rocker/shiny:latest
 
 ENV USER=shiny
+ENV HOME=/home/$USER
 
 # Install system dependencies including those for tidyverse
 RUN apt-get update && \
@@ -21,10 +22,13 @@ RUN R -e "install.packages('log4r')" \
     && R -e "install.packages('RcppTOML')"
 
 
-RUN mkdir rlogs \
-    && chown -R shiny:shiny /rlogs
+# Copy the appwork directory to the home path
+COPY /appwork $HOME/appwork
+RUN chown -R shiny:shiny $HOME
 
+# Copy and prepare the Shiny application
 RUN rm -rf /srv/shiny-server/*
+
 COPY /app/ /srv/shiny-server/
 COPY .Renviron.template /srv/shiny-server/.Renviron
 
@@ -33,7 +37,7 @@ WORKDIR /srv/shiny-server
 RUN chown -R shiny:shiny . && \
     chmod ug+x start-script.sh
 
-
+# Start the application
 WORKDIR /srv/shiny-server/
 
 USER $USER

@@ -48,9 +48,7 @@ po/*~
 # RStudio Connect folder
 rsconnect/
 
+# Work files
 # App log files
 *.log
-
-# App work files
-app/appwork/
 *.csv

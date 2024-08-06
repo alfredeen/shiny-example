@@ -15,15 +15,21 @@ Copy and edit the .Renviron file
 
 ## Running the app in R terminal
 
+Pre-requisites
+
+    Install R, the R language server and R Shiny.
+    In VSCode, can install the Shiny extension.
+
 Open an R terminal
 
     setwd("shiny-example")
 
-Create the logs directory
+Install the R packages
 
-    dir.create("rlogs")
     install.packages("log4r")
     install.packages('RcppTOML')
+    install.packages('readr')
+    install.packages("data.table", dependencies=TRUE)
     library(shiny)
     runApp("app")
 
@@ -38,6 +44,7 @@ Run the container
 
 Browse to the app at  http://localhost:3838/
 
-## View the log files
+
+## View the Shiny server log files
 
     ls /var/log/shiny-server

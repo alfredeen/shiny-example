@@ -4,28 +4,36 @@ library(log4r)
 library(RcppTOML)
 library(data.table)
 
-print("Begin app.R")
+print(paste("Begin app.R. Running in working dir =", getwd()))
+
 
 # Settings from env vars
+appwork_path <- "/home/shiny/appwork"
 log_level <- "DEBUG"
-log_file <- "/rlogs/app.log"
+log_filename <- "app.log"
 
 tryCatch({
   print("Reading environment variables from .Renviron")
 
   readRenviron(".Renviron")
 
+  appwork_path <- Sys.getenv("APPWORK_PATH")
   log_level <- Sys.getenv("R_LOGLEVEL")
-  log_file <- Sys.getenv("R_LOGFILE")
+  log_filename <- Sys.getenv("R_LOGFILENAME")
 
 }, error=function(e) {
-  print(paste("Error while trying to get env vars ", e))
+  print(paste("Error while trying to get env vars", e))
 }, warning=function(e) {
-  print(paste("Warning while trying to get env vars ", e))
+  print(paste("Warning while trying to get env vars", e))
 })
 
+
+print(paste("Path to the work directory appwork set to", appwork_path))
+
 # Logging
-print(paste("Running app with log level = ", log_level, ". Logging to ", log_file))
+log_file <- paste(appwork_path, "rlogs", log_filename, sep = "/")
+
+print(paste("Running app with log level =", log_level, ". Logging to", log_file))
 
 logger <- log4r::logger(log_level, appenders = file_appender(log_file))
 
@@ -48,19 +56,19 @@ tryCatch({
 })
 
 
-# Verify can create a directory and write to it
-dir_appwork <- "appwork"
+# Verify can create a new directory in dir appwork and write to it
+dir_apptemp <- paste(appwork_path, "apptemp", sep = "/")
 
 tryCatch({
 
-  print(paste("print: Creating directory ", dir_appwork))
-  log4r::debug(logger, paste("Creating directory:", dir_appwork))
+  print(paste("print: Creating directory", dir_apptemp))
+  log4r::debug(logger, paste("Creating directory:", dir_apptemp))
 
-  if (!dir.exists(dir_appwork)){
-    dir.create(dir_appwork, showWarnings = TRUE, recursive = TRUE)
+  if (!dir.exists(dir_apptemp)){
+    dir.create(dir_apptemp, showWarnings = TRUE, recursive = TRUE)
   } else {
-    print("Directory appwork already exists.")
-    log4r::debug(logger, paste("Directory appwork already exists:", dir_appwork))
+    print("Directory apptemp already exists.")
+    log4r::debug(logger, paste("Directory apptemp already exists:", dir_apptemp))
   }
 }, error=function(e) {
     log4r::warn(logger, e)
@@ -76,8 +84,8 @@ df <- data.frame(var1=c(1, 2, 3, 4, 5),
 
 tryCatch({
 
-  work_path <- paste(dir_appwork, work_filename, sep="/")
-  print(paste("print: Creating file ", work_path))
+  work_path <- paste(dir_apptemp, work_filename, sep="/")
+  print(paste("print: Creating file", work_path))
   log4r::debug(logger, paste("Creating file:", work_path))
   fwrite(df, file=work_path)
 
