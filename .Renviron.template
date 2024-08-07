@@ -1,2 +1,3 @@
+APPWORK_PATH = "/home/shiny/appwork"
 R_LOGLEVEL = "DEBUG"
-R_LOGFILE = "/rlogs/app.log"
+R_LOGFILENAME = "app.log"
