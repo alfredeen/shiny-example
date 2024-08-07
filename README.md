@@ -38,9 +38,17 @@ Install the R packages
 
     docker build -t shiny-example:dev .
 
-Run the container
+Run the container without mounting a volume (logs and other files in the container):
 
     docker run -p 127.0.0.1:3838:3838 shiny-example:dev
+
+Or, run the container and also mount a volume for the appwork directory (logs and files on the host).
+Make sure to grant write permissions on the appwork dir:
+
+    chmod o+w -R ./appwork
+
+    docker run -p 127.0.0.1:3838:3838 -v ./appwork:/home/shiny/appwork  shiny-example:dev
+
 
 Browse to the app at  http://localhost:3838/
 
