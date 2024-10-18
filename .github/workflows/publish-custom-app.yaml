@@ -1,11 +1,6 @@
-name: Docker publish
+name: Docker publish custom app type
 
 on:
-  push:
-    branches: [ "main" ]
-    # Publish semver tags as releases.
-    tags: [ 'v*.*.*' ]
-
   # Adds ability to run this workflow manually
   workflow_dispatch:
 
@@ -40,7 +35,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value={{date 'YYYYMMDD-HHmm' tz='Europe/Stockholm'}},prefix=${{ github.ref_name }}-
+            type=raw,value={{date 'YYYYMMDD-HHmm' tz='Europe/Stockholm'}},prefix=custom-${{ github.ref_name }}-
 
       - name: Output docker image information
         run: |
@@ -57,12 +52,11 @@ jobs:
       - name: Publish image to GHCR
         uses: docker/build-push-action@v6
         with:
-            file: ./Dockerfile
+            file: ./Dockerfile.custom
             context: .
             push: true
             build-args: version=${{ github.ref_name }}
             tags: |
               ${{ steps.meta.outputs.tags }}
-              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             labels: ${{ steps.meta.outputs.labels }}
   

@@ -53,6 +53,25 @@ Make sure to grant write permissions on the appwork dir:
 Browse to the app at  http://localhost:3838/
 
 
-## View the Shiny server log files
+## Custom app type
+
+Build a custom image that can be deployed as a custom app type
+
+    docker build -t shiny-example:custom-dev -f Dockerfile.custom .
+
+Run the container
+
+    docker run --rm -p 127.0.0.1:3838:3838 shiny-example:custom-dev
+
+Browse to the app at  http://localhost:3838/
+
+
+## Log files
+
+### View the custom app log file
+
+    cat /home/shiny/appwork/rlogs/app.log
+
+### View the Shiny server log files
 
     ls /var/log/shiny-server
