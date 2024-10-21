@@ -30,6 +30,9 @@ tryCatch({
 
 print(paste("Path to the work directory appwork set to", appwork_path))
 
+# Text to be displayed in footer
+dev_msg <- ""
+
 # Logging
 log_file <- paste(appwork_path, "rlogs", log_filename, sep = "/")
 
@@ -56,6 +59,32 @@ tryCatch({
 })
 
 
+# Verify can access existing file
+# Also count nr of files in dir
+existing_dir <- paste(appwork_path, "existingdir", sep = "/")
+existing_file <- paste(existing_dir, "existing-file.txt", sep = "/")
+
+tryCatch({
+
+  print(paste("Counting files in existing dir: ", existing_dir))
+  log4r::debug(logger, paste("Counting files in existing dir:", existing_dir))
+  files <- list.files(existing_dir, pattern = ".", all.files = FALSE)
+  dev_msg <- paste(dev_msg, paste("nr files = ", length(files)), sep = " ")
+
+  print(paste("print: Verifying that file exists: ", existing_file))
+  log4r::debug(logger, paste("Verifying that file exists:", existing_file))
+  file_exists <- file.exists(existing_file)
+  dev_msg <- paste(dev_msg, "file exists existing-file.txt.", sep = " ")
+
+}, error=function(e) {
+    log4r::warn(logger, e)
+    dev_msg <- paste(dev_msg, "warning existing-file.txt.", sep = " ")
+}, warning=function(e) {
+    log4r::warn(logger, e)
+    dev_msg <- paste(dev_msg, "error existing-file.txt.", sep = " ")
+})
+
+
 # Verify can create a new directory in dir appwork and write to it
 dir_apptemp <- paste(appwork_path, "apptemp", sep = "/")
 
@@ -66,14 +95,18 @@ tryCatch({
 
   if (!dir.exists(dir_apptemp)){
     dir.create(dir_apptemp, showWarnings = TRUE, recursive = TRUE)
+    dev_msg <- paste(dev_msg, "created apptemp.", sep = " ")
   } else {
     print("Directory apptemp already exists.")
     log4r::debug(logger, paste("Directory apptemp already exists:", dir_apptemp))
+    dev_msg <- paste(dev_msg, "apptemp existed.", sep = " ")
   }
 }, error=function(e) {
     log4r::warn(logger, e)
+    dev_msg <- paste(dev_msg, "warning apptemp.", sep = " ")
 }, warning=function(e) {
     log4r::warn(logger, e)
+    dev_msg <- paste(dev_msg, "error apptemp.", sep = " ")
 })
 
 
@@ -88,11 +121,14 @@ tryCatch({
   print(paste("print: Creating file", work_path))
   log4r::debug(logger, paste("Creating file:", work_path))
   fwrite(df, file=work_path)
+  dev_msg <- paste(dev_msg, "wrote df.", sep = " ")
 
 }, error=function(e) {
   log4r::warn(logger, e)
+  dev_msg <- paste(dev_msg, "warning df.", sep = " ")
 }, warning=function(e) {
   log4r::warn(logger, e)
+  dev_msg <- paste(dev_msg, "error df.", sep = " ")
 })
 
 
@@ -101,7 +137,7 @@ tryCatch({
 ui <- fluidPage(
 
   # App title ----
-  titlePanel("Hello Shiny!"),
+  titlePanel("Shiny Example"),
 
   # Sidebar layout with input and output definitions ----
   sidebarLayout(
@@ -114,7 +150,9 @@ ui <- fluidPage(
                   label = "Number of bins:",
                   min = 1,
                   max = 50,
-                  value = 30)
+                  value = 30),
+
+      p(actionButton("reset_button", "Reset Tool"))
 
     ),
 
@@ -122,7 +160,11 @@ ui <- fluidPage(
     mainPanel(
 
       # Output: Histogram ----
-      plotOutput(outputId = "distPlot")
+      plotOutput(outputId = "distPlot"),
+
+      textOutput("currentTime"),
+
+      textOutput("nrFilesFound")
 
     ),
 
@@ -131,7 +173,10 @@ ui <- fluidPage(
   hr(),
   div(
       class = "footer",
-      paste("version ", ver)
+      paste("version ", ver),
+      paste("build time: ", format(Sys.time(), "%H:%M:%S")),
+      p(paste("log level from envvar = ", log_level)),
+      p(paste("info:", dev_msg))
       # includeHTML("www/footer.html")
   )
 )
@@ -156,7 +201,24 @@ server <- function(input, output) {
          xlab = "Waiting time to next eruption (in mins)",
          main = "Histogram of waiting times")
 
-    })
+  })
+
+  # Display the current time
+  output$currentTime <- renderText({
+    paste("Current time: ", format(Sys.time(), "%H:%M:%S"))
+  })
+
+  # Display the number of counted files
+  output$nrFilesFound <- renderText({
+    files <- list.files(existing_dir, pattern = ".", all.files = FALSE)
+    paste("Nr files found: ", length(files))
+  })
+
+  #Refresh button
+  observeEvent(input$refresh, {
+    session$reload()
+    return()
+  })
 
 }
 
