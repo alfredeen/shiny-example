@@ -34,8 +34,7 @@ COPY .Renviron.template /srv/shiny-server/.Renviron
 
 WORKDIR /srv/shiny-server
 
-RUN chown -R shiny:shiny . && \
-    chmod ug+x start-script.sh
+RUN chown -R shiny:shiny .
 
 # Start the application
 WORKDIR /srv/shiny-server/
