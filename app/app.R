@@ -33,8 +33,9 @@ print(paste("Path to the work directory appwork set to", appwork_path))
 # Text to be displayed in footer
 dev_msg <- ""
 
-# Logging
-log_file <- paste(appwork_path, "rlogs", log_filename, sep = "/")
+# Logging. Write to a local log file.
+# log_file <- paste(appwork_path, "rlogs", log_filename, sep = "/")
+log_file <- paste("rlogs", log_filename, sep = "/")
 
 print(paste("Running app with log level =", log_level, ". Logging to", log_file))
 
@@ -59,30 +60,56 @@ tryCatch({
 })
 
 
+# Function to count the number of files in a directory
+count_files <- function(path) {
+  print(paste("Counting files in dir: ", path))
+  log4r::debug(logger, paste("Counting files in path:", path))
+
+  tryCatch({
+
+    files <- list.files(path, pattern = ".", all.files = FALSE)
+    return(length(files))
+
+  }, error=function(e) {
+    log4r::warn(logger, e)
+    dev_msg <- paste(dev_msg, "warning existing-file.txt.", sep = " ")
+    return("error")
+  }, warning=function(e) {
+    log4r::warn(logger, e)
+    dev_msg <- paste(dev_msg, "error existing-file.txt.", sep = " ")
+    return("warning")
+  })
+}
+
+# Function to verify can read a file in a directory
+detect_file <- function(filepath) {
+  print(paste("print: Verifying that file exists: ", filepath))
+  log4r::debug(logger, paste("Verifying that file exists:", filepath))
+
+  tryCatch({
+
+    file_exists <- file.exists(filepath)
+    dev_msg <- paste(dev_msg, "file exists existing-file.txt.", sep = " ")
+    return(file_exists)
+
+  }, error=function(e) {
+    log4r::warn(logger, e)
+    dev_msg <- paste(dev_msg, "warning existing-file.txt.", sep = " ")
+    return("error")
+  }, warning=function(e) {
+    log4r::warn(logger, e)
+    dev_msg <- paste(dev_msg, "error existing-file.txt.", sep = " ")
+    return("warning")
+  })
+}
+
+# TODO: Create and use function create_file()
+
+
 # Verify can access existing file
 # Also count nr of files in dir
 existing_dir <- paste(appwork_path, "existingdir", sep = "/")
 existing_file <- paste(existing_dir, "existing-file.txt", sep = "/")
-
-tryCatch({
-
-  print(paste("Counting files in existing dir: ", existing_dir))
-  log4r::debug(logger, paste("Counting files in existing dir:", existing_dir))
-  files <- list.files(existing_dir, pattern = ".", all.files = FALSE)
-  dev_msg <- paste(dev_msg, paste("nr files = ", length(files)), sep = " ")
-
-  print(paste("print: Verifying that file exists: ", existing_file))
-  log4r::debug(logger, paste("Verifying that file exists:", existing_file))
-  file_exists <- file.exists(existing_file)
-  dev_msg <- paste(dev_msg, "file exists existing-file.txt.", sep = " ")
-
-}, error=function(e) {
-    log4r::warn(logger, e)
-    dev_msg <- paste(dev_msg, "warning existing-file.txt.", sep = " ")
-}, warning=function(e) {
-    log4r::warn(logger, e)
-    dev_msg <- paste(dev_msg, "error existing-file.txt.", sep = " ")
-})
 
 
 # Verify can create a new directory in dir appwork and write to it
@@ -152,7 +179,9 @@ ui <- fluidPage(
                   max = 50,
                   value = 30),
 
-      p(actionButton("reset_button", "Reset Tool"))
+      p(actionButton("reset_button", "Reset Tool")),
+      p(actionButton("btnIdentifyFiles", "Identify files")),
+      p(actionButton("btnDetectFile", "Detect existing file")),
 
     ),
 
@@ -163,8 +192,9 @@ ui <- fluidPage(
       plotOutput(outputId = "distPlot"),
 
       textOutput("currentTime"),
-
-      textOutput("nrFilesFound")
+      textOutput("nrFilesFound"),
+      textOutput("detectFileMsg"),
+      textOutput("createFileMsg")
 
     ),
 
@@ -208,10 +238,15 @@ server <- function(input, output) {
     paste("Current time: ", format(Sys.time(), "%H:%M:%S"))
   })
 
-  # Display the number of counted files
-  output$nrFilesFound <- renderText({
-    files <- list.files(existing_dir, pattern = ".", all.files = FALSE)
-    paste("Nr files found: ", length(files))
+  # User initiated actions:
+  # Button to count files
+  output$nrFilesFound <- eventReactive(input$btnIdentifyFiles, {
+    paste("Nr files found in (existing_dir): ", count_files(existing_dir))
+  })
+
+  # Button to detect an existing file
+  output$detectFileMsg <- eventReactive(input$btnDetectFile, {
+    paste("Detected file: ", detect_file(existing_file))
   })
 
   #Refresh button
