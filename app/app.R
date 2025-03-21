@@ -103,7 +103,56 @@ detect_file <- function(filepath) {
   })
 }
 
-# TODO: Create and use function create_file()
+# Function to can create dir and write file
+create_file <- function(dir_apptemp) {
+
+  print(paste("print: Creating directory", dir_apptemp))
+  log4r::debug(logger, paste("Creating directory:", dir_apptemp))
+
+  tryCatch({
+
+    if (!dir.exists(dir_apptemp)){
+      dir.create(dir_apptemp, showWarnings = TRUE, recursive = TRUE)
+      dev_msg <- paste(dev_msg, "created apptemp.", sep = " ")
+    } else {
+      print("Directory apptemp already exists.")
+      log4r::debug(logger, paste("Directory apptemp already exists:", dir_apptemp))
+      dev_msg <- paste(dev_msg, "apptemp existed.", sep = " ")
+    }
+  }, error=function(e) {
+    log4r::warn(logger, e)
+    dev_msg <- paste(dev_msg, "warning apptemp.", sep = " ")
+    return("error creating/checking dir")
+  }, warning=function(e) {
+    log4r::warn(logger, e)
+    dev_msg <- paste(dev_msg, "error apptemp.", sep = " ")
+    return("warning creating/checking dir")
+  })
+
+  work_filename <- "df.csv"
+
+  df <- data.frame(var1=c(1, 2, 3, 4, 5),
+                   var2=c(6, 7, 8, 9, 0))
+
+  tryCatch({
+
+    work_path <- paste(dir_apptemp, work_filename, sep="/")
+    print(paste("print: Creating file", work_path))
+    log4r::debug(logger, paste("Creating file:", work_path))
+    fwrite(df, file=work_path)
+    dev_msg <- paste(dev_msg, "wrote df.", sep = " ")
+
+  }, error=function(e) {
+    log4r::warn(logger, e)
+    dev_msg <- paste(dev_msg, "warning df.", sep = " ")
+    return(paste("error creating file: ", work_filename))
+  }, warning=function(e) {
+    log4r::warn(logger, e)
+    dev_msg <- paste(dev_msg, "error df.", sep = " ")
+    return(paste("warning creating file: ", work_filename))
+  })
+
+}
 
 
 # Verify can access existing file
@@ -111,52 +160,9 @@ detect_file <- function(filepath) {
 existing_dir <- paste(appwork_path, "existingdir", sep = "/")
 existing_file <- paste(existing_dir, "existing-file.txt", sep = "/")
 
-
 # Verify can create a new directory in dir appwork and write to it
 dir_apptemp <- paste(appwork_path, "apptemp", sep = "/")
 
-tryCatch({
-
-  print(paste("print: Creating directory", dir_apptemp))
-  log4r::debug(logger, paste("Creating directory:", dir_apptemp))
-
-  if (!dir.exists(dir_apptemp)){
-    dir.create(dir_apptemp, showWarnings = TRUE, recursive = TRUE)
-    dev_msg <- paste(dev_msg, "created apptemp.", sep = " ")
-  } else {
-    print("Directory apptemp already exists.")
-    log4r::debug(logger, paste("Directory apptemp already exists:", dir_apptemp))
-    dev_msg <- paste(dev_msg, "apptemp existed.", sep = " ")
-  }
-}, error=function(e) {
-    log4r::warn(logger, e)
-    dev_msg <- paste(dev_msg, "warning apptemp.", sep = " ")
-}, warning=function(e) {
-    log4r::warn(logger, e)
-    dev_msg <- paste(dev_msg, "error apptemp.", sep = " ")
-})
-
-
-work_filename <- "df.csv"
-
-df <- data.frame(var1=c(1, 2, 3, 4, 5),
-                 var2=c(6, 7, 8, 9, 0))
-
-tryCatch({
-
-  work_path <- paste(dir_apptemp, work_filename, sep="/")
-  print(paste("print: Creating file", work_path))
-  log4r::debug(logger, paste("Creating file:", work_path))
-  fwrite(df, file=work_path)
-  dev_msg <- paste(dev_msg, "wrote df.", sep = " ")
-
-}, error=function(e) {
-  log4r::warn(logger, e)
-  dev_msg <- paste(dev_msg, "warning df.", sep = " ")
-}, warning=function(e) {
-  log4r::warn(logger, e)
-  dev_msg <- paste(dev_msg, "error df.", sep = " ")
-})
 
 
 
@@ -182,7 +188,7 @@ ui <- fluidPage(
       p(actionButton("reset_button", "Reset Tool")),
       p(actionButton("btnIdentifyFiles", "Identify files")),
       p(actionButton("btnDetectFile", "Detect existing file")),
-
+      p(actionButton("btnCreateFile", "Create file"))
     ),
 
     # Main panel for displaying outputs ----
@@ -195,7 +201,6 @@ ui <- fluidPage(
       textOutput("nrFilesFound"),
       textOutput("detectFileMsg"),
       textOutput("createFileMsg")
-
     ),
 
   ),
@@ -246,7 +251,12 @@ server <- function(input, output) {
 
   # Button to detect an existing file
   output$detectFileMsg <- eventReactive(input$btnDetectFile, {
-    paste("Detected file: ", detect_file(existing_file))
+    paste("Detect file output: ", detect_file(existing_file))
+  })
+
+  # Button to create a file
+  output$createFileMsg <- eventReactive(input$btnCreateFile, {
+    paste("Create file output: ", create_file(dir_apptemp))
   })
 
   #Refresh button
