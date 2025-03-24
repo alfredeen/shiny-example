@@ -26,12 +26,9 @@ Open an R terminal
 
 Install the R packages
 
-    install.packages("log4r")
-    install.packages('RcppTOML')
-    install.packages('readr')
+    install.packages(c("log4r", "RcppTOML", "readr"))
     install.packages("data.table", dependencies=TRUE)
-    library(shiny)
-    runApp("app")
+    library(shiny);runApp("app")
 
 
 ## Build a docker image locally
