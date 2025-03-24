@@ -23,19 +23,18 @@ RUN R -e "install.packages('log4r')" \
 
 
 # Ensure that the expected user is present in the container
-RUN if id shiny &>/dev/null && [ "$(id -u shiny)" -ne 999 ]; then \
+RUN if id shiny 2>/dev/null 1>/dev/null && [ "$(id -u shiny)" -ne 999 ]; then \
         userdel -r shiny; \
-        id -u 999 &>/dev/null && userdel -r "$(id -un 999)"; \
+        id -u 999 2>/dev/null 1>/dev/null && userdel -r "$(id -un 999)"; \
     fi; \
     useradd -u 999 -m -s /bin/bash shiny; \
     chown -R shiny:shiny /var/lib/shiny-server/ /var/log/shiny-server/
 
 # Copy the appwork directory to the home path
+# Also copy and prepare the Shiny application
 COPY /appwork $HOME/appwork
-RUN chown -R shiny:shiny $HOME
-
-# Copy and prepare the Shiny application
-RUN rm -rf /srv/shiny-server/*
+RUN chown -R shiny:shiny $HOME \
+    && rm -rf /srv/shiny-server/* 
 
 COPY /app/ /srv/shiny-server/
 COPY .Renviron.template /srv/shiny-server/.Renviron
