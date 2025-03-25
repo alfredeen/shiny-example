@@ -1,5 +1,5 @@
 # Use an official R runtime as a parent image
-FROM rocker/shiny:latest
+FROM rocker/shiny:4.4.1
 
 ENV USER=shiny
 ENV HOME=/home/$USER
@@ -22,19 +22,27 @@ RUN R -e "install.packages('log4r')" \
     && R -e "install.packages('RcppTOML')"
 
 
-# Copy the appwork directory to the home path
-COPY /appwork $HOME/appwork
-RUN chown -R shiny:shiny $HOME
+# Ensure that the expected user is present in the container
+RUN if id shiny 2>/dev/null 1>/dev/null && [ "$(id -u shiny)" -ne 999 ]; then \
+        userdel -r shiny; \
+        id -u 999 2>/dev/null 1>/dev/null && userdel -r "$(id -un 999)"; \
+    fi; \
+    useradd -u 999 -m -s /bin/bash shiny; \
+    chown -R shiny:shiny /var/lib/shiny-server/ /var/log/shiny-server/
 
-# Copy and prepare the Shiny application
-RUN rm -rf /srv/shiny-server/*
+# Copy the appwork directory to the home path
+# Also copy and prepare the Shiny application
+COPY /appwork $HOME/appwork
+RUN chown -R shiny:shiny $HOME \
+    && rm -rf /srv/shiny-server/* 
 
 COPY /app/ /srv/shiny-server/
 COPY .Renviron.template /srv/shiny-server/.Renviron
+RUN chown -R shiny:shiny /srv/shiny-server/
 
 WORKDIR /srv/shiny-server
 
-RUN chown -R shiny:shiny .
+# RUN chown -R shiny:shiny .
 
 # Start the application
 WORKDIR /srv/shiny-server/

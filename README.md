@@ -76,7 +76,7 @@ Re-deploy the app.
 
 ### View the custom app log file
 
-    cat /home/shiny/appwork/rlogs/app.log
+    tail /srv/shiny-server/rlogs/app.log -f
 
 ### View the Shiny server log files
 
